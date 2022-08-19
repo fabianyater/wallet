@@ -87,14 +87,14 @@ public class AccountController {
         String message = null;
 
         try {
-            if (accountService.getAccountById(id) == null){
+            if (accountService.getAccountById(id) == null) {
                 message = "Account no found";
-            }else{
+            } else {
                 data = accountService.getAccountById(id);
 
                 data.setAccountName(account.getAccountName());
                 data.setAccountCurrency(account.getAccountCurrency());
-                data.setAccountAmount(account.getAccountAmount());
+                data.setAccountBalance(account.getAccountBalance());
 
                 accountService.saveAccounts(data);
                 message = "Account correctly created";
@@ -108,6 +108,36 @@ public class AccountController {
 
         } catch (Exception e) {
             String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(msg);
+            response.setSuccess(false);
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
+    @GetMapping("/{id}/balance")
+    public ResponseEntity<GeneralResponse<Double>> getAccountBalance(@PathVariable("id") Integer id) {
+
+        GeneralResponse<Double> response = new GeneralResponse<>();
+        HttpStatus status = null;
+        Double balance = null;
+        Account account;
+        String message = "";
+
+        try {
+            balance = accountService.getAccountBalance(id);
+
+            message = "Balance value: " + balance;
+
+            response.setMessage(message);
+            response.setMessageResult("Succesful transaction");
+            response.setSuccess(true);
+            response.setData(balance);
+            status = HttpStatus.OK;
+
+        } catch (Exception e) {
+            String msg = "Something has failed. Please contact suuport.";
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);

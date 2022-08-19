@@ -12,5 +12,7 @@ public interface AccountService {
 
     Account getAccountById(int id) throws Exception;
 
+    Double getAccountBalance(int id) throws Exception;
+
 
 }

@@ -24,6 +24,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Double getAccountBalance(int id) throws Exception {
+        return accountRepository.findAccountBalance(id);
+    }
+
+    @Override
     public Account saveAccounts(Account account) throws Exception {
         return accountRepository.save(account);
     }

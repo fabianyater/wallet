@@ -1,10 +1,8 @@
 package com.wallet.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Data
 @Entity
@@ -21,7 +19,7 @@ public class Account {
     @Column(nullable = false)
     private String accountCurrency;
 
-    private Double accountAmount;
+    private Double accountBalance;
 
     @ManyToOne
     private User user;
