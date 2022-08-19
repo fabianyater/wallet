@@ -24,7 +24,6 @@ public class Account {
     private Double accountAmount;
 
     @ManyToOne
-    @JoinColumn(name = "user_user_id")
     private User user;
 
 }

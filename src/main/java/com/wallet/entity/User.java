@@ -24,7 +24,4 @@ public class User {
 
     @Column
     private String jwt;
-
-    @OneToMany(mappedBy = "user")
-    List<Account> accounts;
 }

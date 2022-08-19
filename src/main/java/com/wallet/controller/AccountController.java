@@ -27,7 +27,7 @@ public class AccountController {
 
         try {
 
-            data = accountService.createAccount(account);
+            data = accountService.saveAccounts(account);
             message = "Account correctly created";
 
             response.setMessage(message);
@@ -36,7 +36,6 @@ public class AccountController {
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-
             String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
@@ -70,8 +69,45 @@ public class AccountController {
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-
             String msg = "Something has failed. Please contact suuport.";
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(msg);
+            response.setSuccess(false);
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
+    @PutMapping("/{id}/edit")
+    public ResponseEntity<GeneralResponse<Account>> updateAccount(@RequestBody Account account, @PathVariable("id") Integer id) {
+
+        GeneralResponse<Account> response = new GeneralResponse<>();
+        HttpStatus status = null;
+        Account data = null;
+        String message = null;
+
+        try {
+            if (accountService.getAccountById(id) == null){
+                message = "Account no found";
+            }else{
+                data = accountService.getAccountById(id);
+
+                data.setAccountName(account.getAccountName());
+                data.setAccountCurrency(account.getAccountCurrency());
+                data.setAccountAmount(account.getAccountAmount());
+
+                accountService.saveAccounts(data);
+                message = "Account correctly created";
+
+            }
+            response.setMessageResult("Succesful transaction");
+            response.setMessage(message);
+            response.setSuccess(true);
+            response.setData(data);
+            status = HttpStatus.CREATED;
+
+        } catch (Exception e) {
+            String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);

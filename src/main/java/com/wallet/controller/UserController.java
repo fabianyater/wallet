@@ -3,6 +3,7 @@ package com.wallet.controller;
 import com.wallet.entity.Account;
 import com.wallet.entity.User;
 import com.wallet.model.GeneralResponse;
+import com.wallet.service.AccountService;
 import com.wallet.service.UserService;
 import com.wallet.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +25,9 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AccountService accountService;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -146,17 +151,26 @@ public class UserController {
     public ResponseEntity<GeneralResponse<List<Account>>> getUserAccounts(@PathVariable("userId") Integer userId) {
 
         GeneralResponse<List<Account>> response = new GeneralResponse<>();
-        HttpStatus status = null;
-        List<Account> account = null;
+        HttpStatus status;
+        List<Account> account;
+        List<Account> userAccountList = new ArrayList<Account>();
+
         String message = "";
 
         try {
-            account = userService.getUserAccounts(userId);
+            //TODO: Create query in userRepository to get all user accounts instead of doing logic in Controller
+            //account = userService.getUserAccounts(userId);
+            account = accountService.getAccounts();
 
-            if (account == null) {
+            if (!userService.getById(userId).isPresent()) {
                 response.setErrorCode(1);
                 response.setMessageResult("Not found");
             } else {
+                for (int i = 0; i < account.size(); i++) {
+                    if (account.get(i).getUser().getUserId().equals(userId)) {
+                        userAccountList.add(account.get(i));
+                    }
+                }
                 response.setErrorCode(0);
                 response.setMessageResult("User succesfully found");
             }
@@ -164,11 +178,53 @@ public class UserController {
             message = "Succesful transaction";
             response.setMessage(message);
             response.setSuccess(true);
-            response.setData(account);
+            response.setData(userAccountList);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
 
+            String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(msg);
+            response.setSuccess(false);
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
+    @GetMapping("/{userId}/accounts/{accountId}")
+    public ResponseEntity<GeneralResponse<Account>> getUserAccountsById(
+            @PathVariable("userId") Integer userId,
+            @PathVariable("accountId") Integer accountId) {
+
+        GeneralResponse<Account> response = new GeneralResponse<>();
+        HttpStatus status;
+        Account account;
+        Account userAccountById = null;
+
+        String message = "";
+
+        try {
+            if (!userService.getById(userId).isPresent() || accountService.getAccountById(accountId) == null) {
+                response.setErrorCode(1);
+                response.setMessageResult("Not found");
+            } else {
+                account = accountService.getAccountById(accountId);
+
+                if (account.getUser().getUserId().equals(userId)) {
+                    userAccountById = account;
+                }
+
+                response.setErrorCode(0);
+                response.setMessageResult("User succesfully found");
+            }
+            message = "Succesful transaction";
+            response.setMessage(message);
+            response.setSuccess(true);
+            response.setData(userAccountById);
+            status = HttpStatus.OK;
+
+        } catch (Exception e) {
             String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
