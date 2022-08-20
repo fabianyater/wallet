@@ -38,14 +38,16 @@ public class UserController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    private static final String ERROR_MESSAGE = "Something has failed. Please contact support";
+    private static final String SUCCESS_MESSAGE = "Successful transaction";
+
     @PostMapping("/signup")
     public ResponseEntity<GeneralResponse<User>> save(@RequestBody User user) {
-
         GeneralResponse<User> response = new GeneralResponse<>();
-        HttpStatus status = null;
+        HttpStatus status;
         User data = null;
-        String message = null;
-        List<User> usersList = null;
+        String message;
+        List<User> usersList;
 
         try {
             usersList = userService.get();
@@ -64,8 +66,7 @@ public class UserController {
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-
-            String msg = "Something has failed. Please contact suuport.";
+            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
@@ -77,8 +78,8 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<GeneralResponse<User>> login(@RequestBody User user) {
         GeneralResponse<User> response = new GeneralResponse<>();
-        HttpStatus status = null;
-        String messageResult = "";
+        HttpStatus status;
+        String messageResult;
         try {
             authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
@@ -88,8 +89,7 @@ public class UserController {
 
             response.setToken(user.getJwt());
             response.setMessageResult(messageResult);
-            response.setMessage("Operation successfull");
-            //TODO Create common class for messages
+            response.setMessage(SUCCESS_MESSAGE);
             response.setErrorCode(1);
             response.setSuccess(true);
             response.setData(user);
@@ -102,7 +102,7 @@ public class UserController {
             response.setSuccess(false);
             response.setErrorCode(0);
         } catch (Exception e) {
-            String message = "Something went wrong. Please contact support.";
+            String message = ERROR_MESSAGE;
             status = HttpStatus.FORBIDDEN;
             response.setMessage(message);
             response.setSuccess(false);
@@ -113,32 +113,29 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<GeneralResponse<User>> getUserById(@PathVariable("id") Integer id) {
-
         GeneralResponse<User> response = new GeneralResponse<>();
-        HttpStatus status = null;
-        Optional<User> user = null;
-        String message = "";
+        HttpStatus status;
+        Optional<User> user = Optional.of(new User());
+        String message;
 
         try {
-            user = userService.getById(id);
-
-            if (user == null || user.get().getUserId() == null) {
+            if (!userService.getById(id).isPresent()) {
                 response.setErrorCode(1);
-                response.setMessageResult("Usert not found");
+                response.setMessageResult("User not found");
             } else {
+                user = userService.getById(id);
                 response.setErrorCode(0);
-                response.setMessageResult("User with id: " + user.get().getUserId() + " succesfully found");
+                response.setMessageResult("User successfully found");
             }
 
-            message = "Succesful transaction";
+            message = SUCCESS_MESSAGE;
             response.setMessage(message);
             response.setSuccess(true);
             response.setData(user.get());
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-
-            String msg = "Something has failed. Please contact suuport.";
+            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
@@ -149,17 +146,14 @@ public class UserController {
 
     @GetMapping("/{userId}/accounts")
     public ResponseEntity<GeneralResponse<List<Account>>> getUserAccounts(@PathVariable("userId") Integer userId) {
-
         GeneralResponse<List<Account>> response = new GeneralResponse<>();
         HttpStatus status;
         List<Account> account;
-        List<Account> userAccountList = new ArrayList<Account>();
-
-        String message = "";
+        List<Account> userAccountList = new ArrayList<>();
+        String message;
 
         try {
             //TODO: Create query in userRepository to get all user accounts instead of doing logic in Controller
-            //account = userService.getUserAccounts(userId);
             account = accountService.getAccounts();
 
             if (!userService.getById(userId).isPresent()) {
@@ -172,18 +166,17 @@ public class UserController {
                     }
                 }
                 response.setErrorCode(0);
-                response.setMessageResult("User succesfully found");
+                response.setMessageResult("User successfully found");
             }
 
-            message = "Succesful transaction";
+            message = SUCCESS_MESSAGE;
             response.setMessage(message);
             response.setSuccess(true);
             response.setData(userAccountList);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-
-            String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
@@ -201,8 +194,7 @@ public class UserController {
         HttpStatus status;
         Account account;
         Account userAccountById = null;
-
-        String message = "";
+        String message;
 
         try {
             if (!userService.getById(userId).isPresent() || accountService.getAccountById(accountId) == null) {
@@ -218,14 +210,14 @@ public class UserController {
                 response.setErrorCode(0);
                 response.setMessageResult("User succesfully found");
             }
-            message = "Succesful transaction";
+            message = SUCCESS_MESSAGE;
             response.setMessage(message);
             response.setSuccess(true);
             response.setData(userAccountById);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
@@ -235,6 +227,6 @@ public class UserController {
     }
 
     private boolean containsName(final List<User> users, final String username) {
-        return users.stream().filter(o -> o.getUsername().equals(username)).findFirst().isPresent();
+        return users.stream().anyMatch(o -> o.getUsername().equals(username));
     }
 }

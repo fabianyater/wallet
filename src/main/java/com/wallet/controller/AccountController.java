@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
+import static com.wallet.util.CommonMessages.SUCCESS_MESSAGE;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("accounts")
@@ -19,14 +22,12 @@ public class AccountController {
 
     @PostMapping()
     public ResponseEntity<GeneralResponse<Account>> save(@RequestBody Account account) {
-
         GeneralResponse<Account> response = new GeneralResponse<>();
-        HttpStatus status = null;
-        Account data = null;
-        String message = null;
+        HttpStatus status;
+        Account data;
+        String message;
 
         try {
-
             data = accountService.saveAccounts(account);
             message = "Account correctly created";
 
@@ -36,7 +37,7 @@ public class AccountController {
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
@@ -47,11 +48,10 @@ public class AccountController {
 
     @GetMapping()
     public ResponseEntity<GeneralResponse<List<Account>>> getAccounts() {
-
         GeneralResponse<List<Account>> response = new GeneralResponse<>();
-        HttpStatus status = null;
-        List<Account> account = null;
-        String message = "";
+        HttpStatus status;
+        List<Account> account;
+        String message;
 
         try {
             account = accountService.getAccounts();
@@ -63,13 +63,13 @@ public class AccountController {
             }
 
             response.setMessage(message);
-            response.setMessageResult("Succesful transaction");
+            response.setMessageResult(SUCCESS_MESSAGE);
             response.setSuccess(true);
             response.setData(account);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = "Something has failed. Please contact suuport.";
+            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
@@ -80,11 +80,10 @@ public class AccountController {
 
     @PutMapping("/{id}/edit")
     public ResponseEntity<GeneralResponse<Account>> updateAccount(@RequestBody Account account, @PathVariable("id") Integer id) {
-
         GeneralResponse<Account> response = new GeneralResponse<>();
-        HttpStatus status = null;
+        HttpStatus status;
         Account data = null;
-        String message = null;
+        String message;
 
         try {
             if (accountService.getAccountById(id) == null) {
@@ -100,14 +99,14 @@ public class AccountController {
                 message = "Account correctly created";
 
             }
-            response.setMessageResult("Succesful transaction");
+            response.setMessageResult(SUCCESS_MESSAGE);
             response.setMessage(message);
             response.setSuccess(true);
             response.setData(data);
             status = HttpStatus.CREATED;
 
         } catch (Exception e) {
-            String msg = "Something has failed. Please contact suuport." + e.getLocalizedMessage();
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
@@ -118,35 +117,28 @@ public class AccountController {
 
     @GetMapping("/{id}/balance")
     public ResponseEntity<GeneralResponse<Double>> getAccountBalance(@PathVariable("id") Integer id) {
-
         GeneralResponse<Double> response = new GeneralResponse<>();
-        HttpStatus status = null;
-        Double balance = null;
-        Account account;
-        String message = "";
+        HttpStatus status;
+        Double balance;
+        String message;
 
         try {
             balance = accountService.getAccountBalance(id);
-
             message = "Balance value: " + balance;
 
             response.setMessage(message);
-            response.setMessageResult("Succesful transaction");
+            response.setMessageResult(SUCCESS_MESSAGE);
             response.setSuccess(true);
             response.setData(balance);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = "Something has failed. Please contact suuport.";
+            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);
         }
 
         return new ResponseEntity<>(response, status);
-    }
-
-    private boolean containsName(final List<Account> accounts, final String accountName) {
-        return accounts.stream().filter(o -> o.getAccountName().equals(accountName)).findFirst().isPresent();
     }
 }
