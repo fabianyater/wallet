@@ -10,9 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
 
 @CrossOrigin(origins = "*")
@@ -32,7 +29,7 @@ public class TransactionController {
     @PostMapping("/deposit")
     public ResponseEntity<GeneralResponse<Transaction>> createDeposit(@RequestBody Transaction transaction) {
         GeneralResponse<Transaction> response = new GeneralResponse<>();
-        HttpStatus status;
+        HttpStatus  status;
         Account data;
         String message = "";
 
@@ -105,41 +102,25 @@ public class TransactionController {
         HttpStatus status;
         Account data;
         String message = "";
-        List<Transaction> transactionList;
-        List<Double> transactionAmountList = new ArrayList<>();
-        Double totalAmount = 0.0;
+        Double totalAmount;
         Double gmf;
-
+        Double totalBalance;
+        int accountId = transaction.getAccountId().getAccountId();
 
         try {
             transaction.setTransactionCategory("Tax");
             transaction.setTransactionDescription("IMPUESTO GOBIERNO 4 X 1000");
-            data = accountService.getAccountById(transaction.getAccountId().getAccountId());
-            Double totalBalance = data.getAccountBalance();
+            transaction.setTransactionType(WITHDRAW);
 
-            if (transaction.getTransactionType().equalsIgnoreCase(WITHDRAW)) {
-                transactionList = transactionService.getTransactions();
-                for (int i = 0; i < transactionList.size(); i++) {
-                    if (transactionList.get(i).getTransactionType().equalsIgnoreCase(WITHDRAW)
-                            && transactionList.get(i).getAccountId().getAccountId().equals(data.getAccountId())
-                            && !transactionList.get(i).getTransactionCategory().equalsIgnoreCase("tax")) {
-                        transactionAmountList.add(transactionList.get(i).getTransactionAmount());
-                    }
-                }
+            data = accountService.getAccountById(accountId);
+            totalBalance = data.getAccountBalance();
+            totalAmount = accountService.getTransactionAmountsByAccountId(accountId);
+            gmf = calculateGMF(totalAmount);
+            totalBalance -= gmf;
 
-                for (int i = 0; i < transactionAmountList.size(); i++) {
-                    totalAmount += transactionAmountList.get(i);
-                }
-
-                gmf = (totalAmount * 4) / 1000;
-                totalBalance -= gmf;
-
-                transaction.setTransactionAmount(gmf);
-
-                data.setAccountBalance(totalBalance);
-                transactionService.saveTransaction(transaction);
-            }
-
+            transaction.setTransactionAmount(gmf);
+            data.setAccountBalance(totalBalance);
+            transactionService.saveTransaction(transaction);
 
             response.setMessage(message);
             response.setSuccess(true);
@@ -153,6 +134,10 @@ public class TransactionController {
         }
 
         return new ResponseEntity<>(response, status);
+    }
+
+    private Double calculateGMF(Double amount){
+        return (amount * 4) / 1000;
     }
 
 }
