@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
 import static com.wallet.util.CommonMessages.SUCCESS_MESSAGE;
@@ -179,6 +178,49 @@ public class AccountController {
             response.setMessage(message);
             response.setSuccess(true);
             response.setData(accountTransactions);
+            status = HttpStatus.OK;
+
+        } catch (Exception e) {
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(msg);
+            response.setSuccess(false);
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
+    @GetMapping("/{accountId}/transactions/{transactionId}")
+    public ResponseEntity<GeneralResponse<Transaction>> getAccountTransactionDetails(
+            @PathVariable("accountId") Integer accountId,
+            @PathVariable("transactionId") Integer transactionId) {
+        GeneralResponse<Transaction> response = new GeneralResponse<>();
+        HttpStatus status;
+        Transaction transactionById;
+        Transaction transactionDetail = new Transaction();
+        String message;
+        Account account;
+
+        try {
+
+            if (accountService.getAccountById(accountId) == null) {
+                response.setErrorCode(1);
+                response.setMessageResult("Not found");
+            } else {
+                account = accountService.getAccountById(accountId);
+                transactionById = transactionService.getTransactionById(transactionId);
+
+                    if (transactionById.getAccountId().getAccountId().equals(account.getAccountId())){
+                        transactionDetail = transactionById;
+                    }
+                response.setErrorCode(0);
+                response.setMessageResult("Transaction successfully found.");
+            }
+
+            message = SUCCESS_MESSAGE;
+            response.setMessage(message);
+            response.setSuccess(true);
+            response.setData(transactionDetail);
             status = HttpStatus.OK;
 
         } catch (Exception e) {

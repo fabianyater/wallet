@@ -23,4 +23,9 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> getTransactions() throws Exception {
         return transactionRepository.findAll();
     }
+
+    @Override
+    public Transaction getTransactionById(Integer id) throws Exception {
+        return transactionRepository.findById(id).orElse(null);
+    }
 }

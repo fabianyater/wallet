@@ -10,4 +10,6 @@ public interface TransactionService {
 
     List<Transaction> getTransactions() throws Exception;
 
+    Transaction getTransactionById(Integer id) throws Exception;
+
 }
