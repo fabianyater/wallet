@@ -1,8 +1,10 @@
 package com.wallet.service;
 
 import com.wallet.entity.Account;
+import com.wallet.entity.Transaction;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AccountService {
 
@@ -15,6 +17,8 @@ public interface AccountService {
     Double getAccountBalance(int id) throws Exception;
 
     Double getTransactionAmountsByAccountId(int id) throws Exception;
+
+    List<Transaction> getAccountTransactions(int id) throws Exception;
 
 
 }
