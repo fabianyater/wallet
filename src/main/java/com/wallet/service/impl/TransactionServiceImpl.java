@@ -40,4 +40,9 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findByTransactionIdAndAccountId_AccountId(txnId, accountId);
     }
 
+    @Override
+    public Double getTransactionAmountsByAccountId(int id) throws Exception {
+        return transactionRepository.getTransactionAmountsByAccountId(id);
+    }
+
 }

@@ -17,5 +17,7 @@ public interface TransactionService {
 
     Optional<Transaction> getTransactionSDetails(Integer txnId, Integer accountId) throws Exception;
 
+    Double getTransactionAmountsByAccountId(int id) throws Exception;
+
 
 }

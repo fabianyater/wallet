@@ -119,7 +119,7 @@ public class TransactionController {
 
             data = accountService.getAccountById(accountId);
             totalBalance = data.getAccountBalance();
-            totalAmount = accountService.getTransactionAmountsByAccountId(accountId);
+            totalAmount = transactionService.getTransactionAmountsByAccountId(accountId);
             gmf = calculateGMF(totalAmount);
             totalBalance -= gmf;
 
