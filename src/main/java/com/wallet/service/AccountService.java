@@ -16,9 +16,4 @@ public interface AccountService {
 
     Double getAccountBalance(int id) throws Exception;
 
-    Double getTransactionAmountsByAccountId(int id) throws Exception;
-
-    List<Transaction> getAccountTransactions(int id) throws Exception;
-
-
 }

@@ -31,16 +31,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Double getTransactionAmountsByAccountId(int id) throws Exception {
-        return accountRepository.getTransactionAmountsByAccountId(id);
-    }
-
-    @Override
-    public List<Transaction> getAccountTransactions(int id) throws Exception {
-        return accountRepository.getAccountTransactions(id);
-    }
-
-    @Override
     public Account saveAccounts(Account account) throws Exception {
         return accountRepository.save(account);
     }
