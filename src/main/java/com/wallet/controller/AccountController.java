@@ -154,6 +154,43 @@ public class AccountController {
         return new ResponseEntity<>(response, status);
     }
 
+    @GetMapping("/{accountId}/user/{userId}")
+    public ResponseEntity<GeneralResponse<Account>> getUserAccountsById(
+            @PathVariable("accountId") Integer accountId,
+            @PathVariable("userId") Integer userId) {
+
+        GeneralResponse<Account> response = new GeneralResponse<>();
+        HttpStatus status;
+        Account account;
+        Account userAccountById = null;
+        String message;
+
+        try {
+            if (accountService.getAccountDetails(accountId, userId) == null) {
+                response.setErrorCode(1);
+                response.setMessageResult("Not found");
+            } else {
+                userAccountById = accountService.getAccountDetails(accountId, userId);
+
+                response.setErrorCode(0);
+                response.setMessageResult("User succesfully found");
+            }
+            message = SUCCESS_MESSAGE;
+            response.setMessage(message);
+            response.setSuccess(true);
+            response.setData(userAccountById);
+            status = HttpStatus.OK;
+
+        } catch (Exception e) {
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(msg);
+            response.setSuccess(false);
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
     @GetMapping("/{id}/balance")
     public ResponseEntity<GeneralResponse<Double>> getAccountBalance(@PathVariable("id") Integer id) {
         GeneralResponse<Double> response = new GeneralResponse<>();

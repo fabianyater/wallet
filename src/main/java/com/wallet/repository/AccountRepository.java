@@ -12,11 +12,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @Query(value = "select a.account_balance from accounts a where a.account_id = :id", nativeQuery = true)
     Double findAccountBalance(@Param("id") Integer id);
 
+    Account findByAccountIdAndUser_UserId(Integer accountId, Integer userId);
+
     List<Account> findByUser_UserId(Integer userId);
-
-    @Query(value = "select SUM(t.transaction_amount) from transactions t inner join accounts a \n" +
-            "on t.account_id_account_id = a.account_id where a.account_id = :accountId and t.transaction_type = 'withdraw'\n" +
-            "and t.transaction_category <> 'tax'", nativeQuery = true)
-    Double getTransactionAmountsByAccountId(@Param("accountId") Integer accountId);
-
 }

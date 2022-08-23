@@ -143,48 +143,6 @@ public class UserController {
 
         return new ResponseEntity<>(response, status);
     }
-
-    @GetMapping("/{userId}/accounts/{accountId}")
-    public ResponseEntity<GeneralResponse<Account>> getUserAccountsById(
-            @PathVariable("userId") Integer userId,
-            @PathVariable("accountId") Integer accountId) {
-
-        GeneralResponse<Account> response = new GeneralResponse<>();
-        HttpStatus status;
-        Account account;
-        Account userAccountById = null;
-        String message;
-
-        try {
-            if (!userService.getById(userId).isPresent() || accountService.getAccountById(accountId) == null) {
-                response.setErrorCode(1);
-                response.setMessageResult("Not found");
-            } else {
-                account = accountService.getAccountById(accountId);
-
-                if (account.getUser().getUserId().equals(userId)) {
-                    userAccountById = account;
-                }
-
-                response.setErrorCode(0);
-                response.setMessageResult("User succesfully found");
-            }
-            message = SUCCESS_MESSAGE;
-            response.setMessage(message);
-            response.setSuccess(true);
-            response.setData(userAccountById);
-            status = HttpStatus.OK;
-
-        } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
-        }
-
-        return new ResponseEntity<>(response, status);
-    }
-
     private boolean containsName(final List<User> users, final String username) {
         return users.stream().anyMatch(o -> o.getUsername().equals(username));
     }

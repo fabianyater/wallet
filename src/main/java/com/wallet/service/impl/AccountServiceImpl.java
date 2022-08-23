@@ -26,6 +26,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Account getAccountDetails(int accountId, int userId) throws Exception {
+        return accountRepository.findByAccountIdAndUser_UserId(accountId, userId);
+    }
+
+    @Override
     public Account getAccountById(int id) throws Exception {
         return accountRepository.findById(id).orElse(null);
     }
