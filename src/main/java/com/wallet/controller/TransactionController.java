@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
-import static com.wallet.util.CommonMessages.SUCCESS_MESSAGE;
+import static com.wallet.util.CommonMessages.*;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -35,32 +34,33 @@ public class TransactionController {
     public ResponseEntity<GeneralResponse<Transaction>> createDeposit(@RequestBody Transaction transaction) {
         GeneralResponse<Transaction> response = new GeneralResponse<>();
         HttpStatus status;
-        Account data;
+        Account account;
+        Double totalBalance;
         String message = "";
 
         try {
             if (transaction.getTransactionCategory() == null) {
                 message = "Category not selected";
             } else {
-                data = accountService.getAccountById(transaction.getAccountId().getAccountId());
-                Double totalBalance = data.getAccountBalance();
+                account = accountService.getAccountById(transaction.getAccountId().getAccountId());
+                totalBalance = account.getAccountBalance();
                 totalBalance += transaction.getTransactionAmount();
 
                 if (transaction.getTransactionType().equalsIgnoreCase(DEPOSIT)) {
-                    data.setAccountBalance(totalBalance);
+                    account.setAccountBalance(totalBalance);
                     transactionService.saveTransaction(transaction);
+                    message = "Deposit successfully completed";
                 }
             }
 
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(transaction);
-            status = HttpStatus.OK;
+            status = HttpStatus.CREATED;
+
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -70,32 +70,32 @@ public class TransactionController {
     public ResponseEntity<GeneralResponse<Transaction>> createWithdraw(@RequestBody Transaction transaction) {
         GeneralResponse<Transaction> response = new GeneralResponse<>();
         HttpStatus status;
-        Account data;
+        Account account;
         String message = "";
 
         try {
             if (transaction.getTransactionCategory() == null) {
                 message = "Category not selected";
             } else {
-                data = accountService.getAccountById(transaction.getAccountId().getAccountId());
-                Double totalBalance = data.getAccountBalance();
+                account = accountService.getAccountById(transaction.getAccountId().getAccountId());
+                Double totalBalance = account.getAccountBalance();
                 totalBalance -= transaction.getTransactionAmount();
 
                 if (transaction.getTransactionType().equalsIgnoreCase(WITHDRAW)) {
-                    data.setAccountBalance(totalBalance);
+                    account.setAccountBalance(totalBalance);
                     transactionService.saveTransaction(transaction);
+                    message = "Withdraw successfully completed";
                 }
             }
 
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(transaction);
-            status = HttpStatus.OK;
+            status = HttpStatus.CREATED;
+
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -105,7 +105,7 @@ public class TransactionController {
     public ResponseEntity<GeneralResponse<Transaction>> createTAXOnFinancialMovements(@RequestBody Transaction transaction) {
         GeneralResponse<Transaction> response = new GeneralResponse<>();
         HttpStatus status;
-        Account data;
+        Account account;
         String message = "";
         Double totalAmount;
         Double gmf;
@@ -117,25 +117,29 @@ public class TransactionController {
             transaction.setTransactionDescription("IMPUESTO GOBIERNO 4 X 1000");
             transaction.setTransactionType(WITHDRAW);
 
-            data = accountService.getAccountById(accountId);
-            totalBalance = data.getAccountBalance();
-            totalAmount = transactionService.getTransactionAmountsByAccountId(accountId);
-            gmf = calculateGMF(totalAmount);
-            totalBalance -= gmf;
+            if (accountService.getAccountById(accountId) == null) {
+                message = ACCOUNT_NOT_FOUND;
+            } else {
+                account = accountService.getAccountById(accountId);
+                totalBalance = account.getAccountBalance();
+                totalAmount = transactionService.getTransactionAmountsByAccountId(accountId);
+                gmf = calculateGMF(totalAmount);
+                totalBalance -= gmf;
 
-            transaction.setTransactionAmount(gmf);
-            data.setAccountBalance(totalBalance);
-            transactionService.saveTransaction(transaction);
+                transaction.setTransactionAmount(gmf);
+                account.setAccountBalance(totalBalance);
+                transactionService.saveTransaction(transaction);
+                message = "Transaction successfully created";
+            }
 
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(transaction);
-            status = HttpStatus.OK;
+            status = HttpStatus.CREATED;
+
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -150,25 +154,20 @@ public class TransactionController {
 
         try {
             if (transactionService.getTransactionsByAccountId(accountId) == null) {
-                response.setErrorCode(1);
-                response.setMessageResult("Not found");
+                message = ACCOUNT_NOT_FOUND;
             } else {
                 accountTransactions = transactionService.getTransactionsByAccountId(accountId);
-                response.setErrorCode(0);
-                response.setMessageResult("Transactions successfully found. " + accountTransactions.size() + " transactions");
+                message = "Found " + accountTransactions.size() + " transaction(s)";
             }
 
-            message = SUCCESS_MESSAGE;
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(accountTransactions);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -180,31 +179,26 @@ public class TransactionController {
             @PathVariable("accountId") Integer accountId) {
         GeneralResponse<Optional<Transaction>> response = new GeneralResponse<>();
         HttpStatus status;
-        Optional<Transaction> accountTransactions = null;
+        Optional<Transaction> accountTransactions = Optional.of(new Transaction());
         String message;
 
         try {
 
             if (!transactionService.getTransactionSDetails(txnId, accountId).isPresent()) {
-                response.setErrorCode(1);
-                response.setMessageResult("Not found");
+                message = ACCOUNT_NOT_FOUND;
             } else {
                 accountTransactions = transactionService.getTransactionSDetails(txnId, accountId);
-                response.setErrorCode(0);
-                response.setMessageResult("Transactions successfully found. " + accountTransactions.get() + " transactions");
+                message = "Transaction successfully found";
             }
 
-            message = SUCCESS_MESSAGE;
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(accountTransactions);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);

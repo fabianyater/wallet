@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -25,5 +27,4 @@ public class Account {
     @ManyToOne
     @JsonIgnoreProperties(value = {"username", "password", "fullname", "jwt"})
     private User user;
-
 }

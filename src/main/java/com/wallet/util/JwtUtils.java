@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtils {
-    private final static String SECRET = "wallet";
+    private static final String SECRET = "wallet";
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();

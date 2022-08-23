@@ -41,6 +41,4 @@ public class Transaction {
     @JsonIgnoreProperties(value = {"accountName", "accountCurrency", "accountBalance", "user"})
     @ManyToOne(optional = false, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Account accountId;
-
-
 }
