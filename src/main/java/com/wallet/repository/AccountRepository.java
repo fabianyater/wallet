@@ -17,7 +17,4 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             "and t.transaction_category <> 'tax'", nativeQuery = true)
     Double getTransactionAmountsByAccountId(@Param("accountId") Integer accountId);
 
-    @Query(value = "select t from transactions t inner join accounts a on t.account_id_account_id = a.account_id \n" +
-            " where a.account_id = :accountId", nativeQuery = true)
-    List<Transaction> getAccountTransactions(@Param("accountId") Integer accountId);
 }

@@ -10,7 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
+import static com.wallet.util.CommonMessages.SUCCESS_MESSAGE;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -126,6 +131,75 @@ public class TransactionController {
             response.setSuccess(true);
             response.setData(transaction);
             status = HttpStatus.OK;
+        } catch (Exception e) {
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(msg);
+            response.setSuccess(false);
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<GeneralResponse<List<Transaction>>> getAccountTransactions(@PathVariable("accountId") Integer accountId) {
+        GeneralResponse<List<Transaction>> response = new GeneralResponse<>();
+        HttpStatus status;
+        List<Transaction> accountTransactions = null;
+        String message;
+
+        try {
+            if (transactionService.getTransactionsByAccountId(accountId) == null) {
+                response.setErrorCode(1);
+                response.setMessageResult("Not found");
+            } else {
+                accountTransactions = transactionService.getTransactionsByAccountId(accountId);
+                response.setErrorCode(0);
+                response.setMessageResult("Transactions successfully found. " + accountTransactions.size() + " transactions");
+            }
+
+            message = SUCCESS_MESSAGE;
+            response.setMessage(message);
+            response.setSuccess(true);
+            response.setData(accountTransactions);
+            status = HttpStatus.OK;
+
+        } catch (Exception e) {
+            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(msg);
+            response.setSuccess(false);
+        }
+
+        return new ResponseEntity<>(response, status);
+    }
+
+    @GetMapping("/{txnId}/account/{accountId}")
+    public ResponseEntity<GeneralResponse<Optional<Transaction>>> getAccountTransactions(
+            @PathVariable("txnId") Integer txnId,
+            @PathVariable("accountId") Integer accountId) {
+        GeneralResponse<Optional<Transaction>> response = new GeneralResponse<>();
+        HttpStatus status;
+        Optional<Transaction> accountTransactions = null;
+        String message;
+
+        try {
+
+            if (!transactionService.getTransactionSDetails(txnId, accountId).isPresent()) {
+                response.setErrorCode(1);
+                response.setMessageResult("Not found");
+            } else {
+                accountTransactions = transactionService.getTransactionSDetails(txnId, accountId);
+                response.setErrorCode(0);
+                response.setMessageResult("Transactions successfully found. " + accountTransactions.get() + " transactions");
+            }
+
+            message = SUCCESS_MESSAGE;
+            response.setMessage(message);
+            response.setSuccess(true);
+            response.setData(accountTransactions);
+            status = HttpStatus.OK;
+
         } catch (Exception e) {
             String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
