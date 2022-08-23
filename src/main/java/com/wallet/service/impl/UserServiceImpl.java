@@ -34,12 +34,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public User save(User user) throws Exception {
         return userRepository.save(user);
     }
-
-    @Override
-    public List<Account> getUserAccounts(Integer id) throws Exception {
-        return userRepository.getUserAccounts(id);
-    }
-
     @Override
     public boolean delete(Integer id) throws Exception {
         userRepository.deleteById(id);

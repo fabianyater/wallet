@@ -14,8 +14,6 @@ public interface UserService {
 
     public User save(User users) throws Exception;
 
-    public List<Account> getUserAccounts(Integer id) throws Exception;
-
     public boolean delete(Integer id) throws Exception;
 
 }
