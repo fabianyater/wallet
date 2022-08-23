@@ -42,7 +42,7 @@ public class UserController {
     private static final String SUCCESS_MESSAGE = "Successful transaction";
 
     @PostMapping("/signup")
-    public ResponseEntity<GeneralResponse<User>> save(@RequestBody User user) {
+    public ResponseEntity<GeneralResponse<User>> createUser(@RequestBody User user) {
         GeneralResponse<User> response = new GeneralResponse<>();
         HttpStatus status;
         User data = null;
@@ -136,47 +136,6 @@ public class UserController {
 
         } catch (Exception e) {
             String msg = ERROR_MESSAGE;
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
-        }
-
-        return new ResponseEntity<>(response, status);
-    }
-
-    @GetMapping("/{userId}/accounts")
-    public ResponseEntity<GeneralResponse<List<Account>>> getUserAccounts(@PathVariable("userId") Integer userId) {
-        GeneralResponse<List<Account>> response = new GeneralResponse<>();
-        HttpStatus status;
-        List<Account> account;
-        List<Account> userAccountList = new ArrayList<>();
-        String message;
-
-        try {
-            //TODO: Create query in userRepository to get all user accounts instead of doing logic in Controller
-            account = accountService.getAccounts();
-
-            if (!userService.getById(userId).isPresent()) {
-                response.setErrorCode(1);
-                response.setMessageResult("Not found");
-            } else {
-                for (int i = 0; i < account.size(); i++) {
-                    if (account.get(i).getUser().getUserId().equals(userId)) {
-                        userAccountList.add(account.get(i));
-                    }
-                }
-                response.setErrorCode(0);
-                response.setMessageResult("User successfully found");
-            }
-
-            message = SUCCESS_MESSAGE;
-            response.setMessage(message);
-            response.setSuccess(true);
-            response.setData(userAccountList);
-            status = HttpStatus.OK;
-
-        } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(msg);
             response.setSuccess(false);

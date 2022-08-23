@@ -12,6 +12,8 @@ public interface AccountService {
 
     public List<Account> getAccounts() throws Exception;
 
+    public List<Account> getAccountsByUserId(int userId) throws Exception;
+
     Account getAccountById(int id) throws Exception;
 
     Double getAccountBalance(int id) throws Exception;

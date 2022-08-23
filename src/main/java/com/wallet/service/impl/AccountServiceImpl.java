@@ -21,6 +21,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Account> getAccountsByUserId(int userId) throws Exception {
+        return accountRepository.findByUser_UserId(userId);
+    }
+
+    @Override
     public Account getAccountById(int id) throws Exception {
         return accountRepository.findById(id).orElse(null);
     }
