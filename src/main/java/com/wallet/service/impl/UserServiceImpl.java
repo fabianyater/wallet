@@ -1,6 +1,5 @@
 package com.wallet.service.impl;
 
-import com.wallet.entity.Account;
 import com.wallet.entity.User;
 import com.wallet.repository.UserRepository;
 import com.wallet.service.UserService;
@@ -43,7 +42,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User usr = userRepository.findByUsername(username);
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(usr.getUsername(), usr.getPassword(), new ArrayList<>());
-        return userDetails;
+        return new org.springframework.security.core.userdetails.User(usr.getUsername(), usr.getPassword(), new ArrayList<>());
     }
 }

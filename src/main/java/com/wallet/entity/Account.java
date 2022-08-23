@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -26,4 +28,14 @@ public class Account {
     @JsonIgnoreProperties(value = {"username", "password", "fullname", "jwt"})
     private User user;
 
+    @OneToMany(mappedBy = "accountId", orphanRemoval = true)
+    private Set<Transaction> transactions = new LinkedHashSet<>();
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 }

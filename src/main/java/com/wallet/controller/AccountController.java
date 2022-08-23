@@ -1,7 +1,6 @@
 package com.wallet.controller;
 
 import com.wallet.entity.Account;
-import com.wallet.entity.Transaction;
 import com.wallet.model.GeneralResponse;
 import com.wallet.service.AccountService;
 import com.wallet.service.TransactionService;
@@ -10,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
@@ -30,23 +28,29 @@ public class AccountController {
     public ResponseEntity<GeneralResponse<Account>> save(@RequestBody Account account) {
         GeneralResponse<Account> response = new GeneralResponse<>();
         HttpStatus status;
-        Account data;
+        Account data = null;
+        List<Account> accounts;
         String message;
 
         try {
-            data = accountService.saveAccounts(account);
-            message = "Account correctly created";
+            accounts = accountService.getAccounts();
+
+            if (!containsName(accounts, account.getAccountName())) {
+                data = accountService.saveAccount(account);
+                message = "Account correctly created";
+            } else {
+                message = "Account name is already in use";
+            }
 
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(data);
-            status = HttpStatus.OK;
+            response.setCode(201);
+            status = HttpStatus.CREATED;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -62,23 +66,21 @@ public class AccountController {
         try {
             account = accountService.getAccounts();
 
-            if (!account.isEmpty()) {
+            if (!accountService.getAccounts().isEmpty()) {
                 message = "Found " + account.size() + " account(s)";
             } else {
-                message = "There is no any account";
+                message = "No accounts found";
             }
 
             response.setMessage(message);
-            response.setMessageResult(SUCCESS_MESSAGE);
-            response.setSuccess(true);
             response.setData(account);
+            response.setCode(200);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -101,21 +103,18 @@ public class AccountController {
                 data.setAccountCurrency(account.getAccountCurrency());
                 data.setAccountBalance(account.getAccountBalance());
 
-                accountService.saveAccounts(data);
-                message = "Account correctly created";
-
+                accountService.saveAccount(data);
+                message = "Account successfully created";
             }
-            response.setMessageResult(SUCCESS_MESSAGE);
+
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(data);
             status = HttpStatus.CREATED;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -130,25 +129,20 @@ public class AccountController {
 
         try {
             if (accountService.getAccountsByUserId(userId) == null) {
-                response.setErrorCode(1);
-                response.setMessageResult("Not found");
+                message = "Not found";
             } else {
                 userAccountList = accountService.getAccountsByUserId(userId);
-                response.setErrorCode(0);
-                response.setMessageResult("User successfully found");
+                message = "User successfully found";
             }
 
-            message = SUCCESS_MESSAGE;
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(userAccountList);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -161,31 +155,25 @@ public class AccountController {
 
         GeneralResponse<Account> response = new GeneralResponse<>();
         HttpStatus status;
-        Account account;
         Account userAccountById = null;
         String message;
 
         try {
             if (accountService.getAccountDetails(accountId, userId) == null) {
-                response.setErrorCode(1);
-                response.setMessageResult("Not found");
+                message = "Not found";
             } else {
                 userAccountById = accountService.getAccountDetails(accountId, userId);
-
-                response.setErrorCode(0);
-                response.setMessageResult("User succesfully found");
+                message = "User successfully found";
             }
-            message = SUCCESS_MESSAGE;
+
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(userAccountById);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE + e.getLocalizedMessage();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -201,20 +189,19 @@ public class AccountController {
         try {
             balance = accountService.getAccountBalance(id);
             message = "Balance value: " + balance;
-
             response.setMessage(message);
-            response.setMessageResult(SUCCESS_MESSAGE);
-            response.setSuccess(true);
             response.setData(balance);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
-
         return new ResponseEntity<>(response, status);
+    }
+
+    private boolean containsName(final List<Account> accounts, final String accountName) {
+        return accounts.stream().anyMatch(o -> o.getAccountName().equals(accountName));
     }
 }

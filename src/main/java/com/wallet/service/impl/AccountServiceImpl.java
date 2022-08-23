@@ -41,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account saveAccounts(Account account) throws Exception {
+    public Account saveAccount(Account account) throws Exception {
         return accountRepository.save(account);
     }
 }

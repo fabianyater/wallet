@@ -39,7 +39,6 @@ public class UserController {
     private JwtUtils jwtUtils;
 
     private static final String ERROR_MESSAGE = "Something has failed. Please contact support";
-    private static final String SUCCESS_MESSAGE = "Successful transaction";
 
     @PostMapping("/signup")
     public ResponseEntity<GeneralResponse<User>> createUser(@RequestBody User user) {
@@ -55,21 +54,19 @@ public class UserController {
             if (!containsName(usersList, user.getUsername())) {
                 user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
                 data = userService.save(user);
-                message = "It Save " + data + " users.";
+                message = "User successfully created";
             } else {
                 message = "Username is already in use";
             }
 
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(data);
-            status = HttpStatus.OK;
+            status = HttpStatus.CREATED;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -79,33 +76,26 @@ public class UserController {
     public ResponseEntity<GeneralResponse<User>> login(@RequestBody User user) {
         GeneralResponse<User> response = new GeneralResponse<>();
         HttpStatus status;
-        String messageResult;
+        String message;
         try {
             authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
             user.setJwt(jwtUtils.generateToken(user.getUsername()));
             user.setPassword(null);
-            messageResult = "Login successfull for user: " + user.getUsername() + ".";
-
-            response.setToken(user.getJwt());
-            response.setMessageResult(messageResult);
-            response.setMessage(SUCCESS_MESSAGE);
-            response.setErrorCode(1);
-            response.setSuccess(true);
+            message = "User: " + user.getUsername() + " successfully logged.";
+            response.setMessage(message);
             response.setData(user);
             status = HttpStatus.CREATED;
 
         } catch (AuthenticationException authException) {
-            String message = "Incorrect user or password.";
+            message = "Incorrect user or password.";
             status = HttpStatus.FORBIDDEN;
             response.setMessage(message);
-            response.setSuccess(false);
-            response.setErrorCode(0);
+            response.setCode(status.value());
         } catch (Exception e) {
-            String message = ERROR_MESSAGE;
-            status = HttpStatus.FORBIDDEN;
-            response.setMessage(message);
-            response.setSuccess(false);
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
@@ -120,29 +110,25 @@ public class UserController {
 
         try {
             if (!userService.getById(id).isPresent()) {
-                response.setErrorCode(1);
-                response.setMessageResult("User not found");
+                message = "User not found";
             } else {
                 user = userService.getById(id);
-                response.setErrorCode(0);
-                response.setMessageResult("User successfully found");
+                message = "User successfully found";
             }
 
-            message = SUCCESS_MESSAGE;
             response.setMessage(message);
-            response.setSuccess(true);
             response.setData(user.get());
             status = HttpStatus.OK;
 
         } catch (Exception e) {
-            String msg = ERROR_MESSAGE;
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(msg);
-            response.setSuccess(false);
+            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
+            response.setCode(500);
         }
 
         return new ResponseEntity<>(response, status);
     }
+
     private boolean containsName(final List<User> users, final String username) {
         return users.stream().anyMatch(o -> o.getUsername().equals(username));
     }
