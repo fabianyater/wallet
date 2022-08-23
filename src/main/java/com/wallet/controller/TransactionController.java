@@ -34,7 +34,7 @@ public class TransactionController {
     @PostMapping("/deposit")
     public ResponseEntity<GeneralResponse<Transaction>> createDeposit(@RequestBody Transaction transaction) {
         GeneralResponse<Transaction> response = new GeneralResponse<>();
-        HttpStatus  status;
+        HttpStatus status;
         Account data;
         String message = "";
 
@@ -142,7 +142,7 @@ public class TransactionController {
     }
 
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<GeneralResponse<List<Transaction>>> getAccountTransactions(@PathVariable("accountId") Integer accountId) {
+    public ResponseEntity<GeneralResponse<List<Transaction>>> getTransactionsByAccountId(@PathVariable("accountId") Integer accountId) {
         GeneralResponse<List<Transaction>> response = new GeneralResponse<>();
         HttpStatus status;
         List<Transaction> accountTransactions = null;
@@ -175,7 +175,7 @@ public class TransactionController {
     }
 
     @GetMapping("/{txnId}/account/{accountId}")
-    public ResponseEntity<GeneralResponse<Optional<Transaction>>> getAccountTransactions(
+    public ResponseEntity<GeneralResponse<Optional<Transaction>>> getTransactionDetails(
             @PathVariable("txnId") Integer txnId,
             @PathVariable("accountId") Integer accountId) {
         GeneralResponse<Optional<Transaction>> response = new GeneralResponse<>();
@@ -210,7 +210,7 @@ public class TransactionController {
         return new ResponseEntity<>(response, status);
     }
 
-    private Double calculateGMF(Double amount){
+    private Double calculateGMF(Double amount) {
         return (amount * 4) / 1000;
     }
 
