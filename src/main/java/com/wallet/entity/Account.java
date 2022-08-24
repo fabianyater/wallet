@@ -24,7 +24,11 @@ public class Account {
 
     private Double accountBalance;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = {"username", "password", "fullname", "jwt"})
-    private User user;
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "user_id_user_id")
+    private User userId;
+
+    @OneToMany(mappedBy = "accountId", orphanRemoval = true)
+    private Set<Transaction> transactions = new LinkedHashSet<>();
+
 }

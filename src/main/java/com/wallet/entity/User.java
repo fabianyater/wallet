@@ -3,7 +3,9 @@ package com.wallet.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -24,4 +26,7 @@ public class User {
 
     @Column
     private String jwt;
+
+    @OneToMany(mappedBy = "userId", orphanRemoval = true)
+    private Set<Account> accounts = new LinkedHashSet<>();
 }

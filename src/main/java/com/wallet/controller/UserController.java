@@ -1,6 +1,5 @@
 package com.wallet.controller;
 
-import com.wallet.entity.Account;
 import com.wallet.entity.User;
 import com.wallet.model.GeneralResponse;
 import com.wallet.service.AccountService;
@@ -15,7 +14,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

@@ -35,7 +35,6 @@ public class TransactionController {
         GeneralResponse<Transaction> response = new GeneralResponse<>();
         HttpStatus status;
         Account account;
-        Double totalBalance;
         String message = "";
 
         try {
@@ -43,20 +42,19 @@ public class TransactionController {
                 message = "Category not selected";
             } else {
                 account = accountService.getAccountById(transaction.getAccountId().getAccountId());
-                totalBalance = account.getAccountBalance();
+                Double totalBalance = account.getAccountBalance();
                 totalBalance += transaction.getTransactionAmount();
 
                 if (transaction.getTransactionType().equalsIgnoreCase(DEPOSIT)) {
                     account.setAccountBalance(totalBalance);
                     transactionService.saveTransaction(transaction);
-                    message = "Deposit successfully completed";
+                    message = "Transaction successfully created";
                 }
             }
 
             response.setMessage(message);
             response.setData(transaction);
             status = HttpStatus.CREATED;
-
         } catch (Exception e) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
@@ -84,14 +82,13 @@ public class TransactionController {
                 if (transaction.getTransactionType().equalsIgnoreCase(WITHDRAW)) {
                     account.setAccountBalance(totalBalance);
                     transactionService.saveTransaction(transaction);
-                    message = "Withdraw successfully completed";
+                    message = "Transaction successfully created";
                 }
             }
 
             response.setMessage(message);
             response.setData(transaction);
-            status = HttpStatus.CREATED;
-
+            status = HttpStatus.OK;
         } catch (Exception e) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
@@ -134,8 +131,7 @@ public class TransactionController {
 
             response.setMessage(message);
             response.setData(transaction);
-            status = HttpStatus.CREATED;
-
+            status = HttpStatus.OK;
         } catch (Exception e) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
@@ -154,10 +150,10 @@ public class TransactionController {
 
         try {
             if (transactionService.getTransactionsByAccountId(accountId) == null) {
-                message = ACCOUNT_NOT_FOUND;
+                message = "Not found";
             } else {
                 accountTransactions = transactionService.getTransactionsByAccountId(accountId);
-                message = "Found " + accountTransactions.size() + " transaction(s)";
+                message = "Transactions successfully found. " + accountTransactions.size() + " transactions";
             }
 
             response.setMessage(message);
@@ -179,13 +175,13 @@ public class TransactionController {
             @PathVariable("accountId") Integer accountId) {
         GeneralResponse<Optional<Transaction>> response = new GeneralResponse<>();
         HttpStatus status;
-        Optional<Transaction> accountTransactions = Optional.of(new Transaction());
+        Optional<Transaction> accountTransactions = null;
         String message;
 
         try {
 
             if (!transactionService.getTransactionSDetails(txnId, accountId).isPresent()) {
-                message = ACCOUNT_NOT_FOUND;
+                message = "Not found";
             } else {
                 accountTransactions = transactionService.getTransactionSDetails(txnId, accountId);
                 message = "Transaction successfully found";

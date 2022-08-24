@@ -22,12 +22,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Account> getAccountsByUserId(int userId) throws Exception {
-        return accountRepository.findByUser_UserId(userId);
+        return accountRepository.findByUserId_UserId(userId);
     }
 
     @Override
     public Account getAccountDetails(int accountId, int userId) throws Exception {
-        return accountRepository.findByAccountIdAndUser_UserId(accountId, userId);
+        return accountRepository.findByAccountIdAndUserId_UserId(accountId, userId);
     }
 
     @Override

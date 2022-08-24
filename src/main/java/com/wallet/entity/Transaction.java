@@ -38,7 +38,8 @@ public class Transaction {
     @Column(nullable = false)
     private LocalTime transactionTime;
 
-    @JsonIgnoreProperties(value = {"accountName", "accountCurrency", "accountBalance", "user"})
-    @ManyToOne(optional = false, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "account_id_account_id")
     private Account accountId;
+
 }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
-import static com.wallet.util.CommonMessages.SUCCESS_MESSAGE;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -60,20 +59,20 @@ public class AccountController {
     public ResponseEntity<GeneralResponse<List<Account>>> getAccounts() {
         GeneralResponse<List<Account>> response = new GeneralResponse<>();
         HttpStatus status;
-        List<Account> account;
+        List<Account> accounts;
         String message;
 
         try {
-            account = accountService.getAccounts();
+            accounts = accountService.getAccounts();
 
             if (!accountService.getAccounts().isEmpty()) {
-                message = "Found " + account.size() + " account(s)";
+                message = "Found " + accounts.size() + " account(s)";
             } else {
                 message = "No accounts found";
             }
 
             response.setMessage(message);
-            response.setData(account);
+            response.setData(accounts);
             response.setCode(200);
             status = HttpStatus.OK;
 
