@@ -1,12 +1,15 @@
 package com.wallet.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.time.LocalTime;
 import java.util.Date;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property="transactionId")
 @Data
 @Entity
 @Table(name = "transactions")
