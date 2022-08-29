@@ -40,10 +40,10 @@ public class AccountController {
         String message;
 
         try {
-            accounts = accountService.getAccounts();
+            account = modelMapper.map(accountDtoRequest, Account.class);
+            accounts = accountService.getAccountsByUserId(account.getUser().getUserId());
 
             if (!containsName(accounts, accountDtoRequest.getAccountName())) {
-                account = modelMapper.map(accountDtoRequest, Account.class);
                 accountService.saveAccount(account);
                 accountDto = modelMapper.map(account, AccountDto.class);
                 message = "Account correctly created";
