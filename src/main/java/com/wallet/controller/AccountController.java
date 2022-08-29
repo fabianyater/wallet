@@ -1,7 +1,7 @@
 package com.wallet.controller;
 
 import com.wallet.domain.dto.AccountDto;
-import com.wallet.domain.dto.UpdateAccountDto;
+import com.wallet.domain.dto.AccountInfoDto;
 import com.wallet.domain.entity.Account;
 import com.wallet.model.GeneralResponse;
 import com.wallet.service.AccountService;
@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
 
@@ -65,48 +66,18 @@ public class AccountController {
         return new ResponseEntity<>(response, status);
     }
 
-    @GetMapping()
-    public ResponseEntity<GeneralResponse<List<Account>>> getAccounts() {
-        GeneralResponse<List<Account>> response = new GeneralResponse<>();
-        HttpStatus status;
-        List<Account> accounts;
-        String message;
-
-        try {
-            accounts = accountService.getAccounts();
-
-            if (!accountService.getAccounts().isEmpty()) {
-                message = "Found " + accounts.size() + " account(s)";
-            } else {
-                message = "No accounts found";
-            }
-
-            response.setMessage(message);
-            response.setData(accounts);
-            response.setCode(200);
-            status = HttpStatus.OK;
-
-        } catch (Exception e) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-            response.setMessage(ERROR_MESSAGE + e.getLocalizedMessage());
-            response.setCode(500);
-        }
-
-        return new ResponseEntity<>(response, status);
-    }
-
     @PutMapping("/{accountId}/edit")
-    public ResponseEntity<GeneralResponse<UpdateAccountDto>> updateAccount(@RequestBody UpdateAccountDto accountDtoRequest, @PathVariable("accountId") Integer accountId) {
-        GeneralResponse<UpdateAccountDto> response = new GeneralResponse<>();
+    public ResponseEntity<GeneralResponse<AccountInfoDto>> updateAccount(@RequestBody AccountInfoDto accountDtoRequest, @PathVariable("accountId") Integer accountId) {
+        GeneralResponse<AccountInfoDto> response = new GeneralResponse<>();
         HttpStatus status;
         Account account;
         Account newAccount;
         List<Account> accounts;
-        UpdateAccountDto updateAccountDto = null;
+        AccountInfoDto accountInfoDto = null;
         String message;
 
         try {
-            if (accountService.getAccountById(accountId) == null || accountService.getAccountById(accountId).getAccountId() != accountId) {
+            if (accountService.getAccountById(accountId) == null || !accountService.getAccountById(accountId).getAccountId().equals(accountId)) {
                 message = "Account no found";
             } else {
                 account = accountService.getAccountById(accountId);
@@ -119,7 +90,7 @@ public class AccountController {
 
                     newAccount = accountService.saveAccount(account);
 
-                    updateAccountDto = modelMapper.map(newAccount, UpdateAccountDto.class);
+                    accountInfoDto = modelMapper.map(newAccount, AccountInfoDto.class);
                     message = "Account correctly updated";
                 } else {
                     message = "Account name is already in use";
@@ -128,7 +99,7 @@ public class AccountController {
             }
 
             response.setMessage(message);
-            response.setData(updateAccountDto);
+            response.setData(accountInfoDto);
             status = HttpStatus.CREATED;
 
         } catch (Exception e) {
@@ -141,10 +112,11 @@ public class AccountController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<GeneralResponse<List<Account>>> getAccountsByUserId(@PathVariable("userId") Integer userId) {
-        GeneralResponse<List<Account>> response = new GeneralResponse<>();
+    public ResponseEntity<GeneralResponse<List<AccountInfoDto>>> getAccountsByUserId(@PathVariable("userId") Integer userId) {
+        GeneralResponse<List<AccountInfoDto>> response = new GeneralResponse<>();
         HttpStatus status;
         List<Account> userAccountList = null;
+        List<AccountInfoDto> accountDtos = null;
         String message;
 
         try {
@@ -152,11 +124,12 @@ public class AccountController {
                 message = "Not found";
             } else {
                 userAccountList = accountService.getAccountsByUserId(userId);
+                accountDtos = userAccountList.stream().map(this::convertToDto).collect(Collectors.toList());
                 message = "User successfully found";
             }
 
             response.setMessage(message);
-            response.setData(userAccountList);
+            response.setData(accountDtos);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
@@ -169,13 +142,14 @@ public class AccountController {
     }
 
     @GetMapping("/{accountId}/user/{userId}")
-    public ResponseEntity<GeneralResponse<Account>> getUserAccountsById(
+    public ResponseEntity<GeneralResponse<AccountInfoDto>> getUserAccountsById(
             @PathVariable("accountId") Integer accountId,
             @PathVariable("userId") Integer userId) {
 
-        GeneralResponse<Account> response = new GeneralResponse<>();
+        GeneralResponse<AccountInfoDto> response = new GeneralResponse<>();
         HttpStatus status;
-        Account userAccountById = null;
+        Account userAccountById;
+        AccountInfoDto accountInfoDto = null;
         String message;
 
         try {
@@ -183,11 +157,12 @@ public class AccountController {
                 message = "Not found";
             } else {
                 userAccountById = accountService.getAccountDetails(accountId, userId);
+                accountInfoDto = convertToDto(userAccountById);
                 message = "User successfully found";
             }
 
             response.setMessage(message);
-            response.setData(userAccountById);
+            response.setData(accountInfoDto);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
@@ -223,5 +198,10 @@ public class AccountController {
 
     private boolean containsName(final List<Account> accounts, final String accountName) {
         return accounts.stream().anyMatch(o -> o.getAccountName().equals(accountName));
+    }
+
+    private AccountInfoDto convertToDto(Account account) {
+        AccountInfoDto accountInfoDto = modelMapper.map(account, AccountInfoDto.class);
+        return accountInfoDto;
     }
 }
