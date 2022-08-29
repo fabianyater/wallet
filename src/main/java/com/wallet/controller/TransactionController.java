@@ -1,7 +1,7 @@
 package com.wallet.controller;
 
-import com.wallet.entity.Account;
-import com.wallet.entity.Transaction;
+import com.wallet.domain.entity.Account;
+import com.wallet.domain.entity.Transaction;
 import com.wallet.model.GeneralResponse;
 import com.wallet.service.AccountService;
 import com.wallet.service.TransactionService;
@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +40,7 @@ public class TransactionController {
             if (transaction.getTransactionCategory() == null) {
                 message = "Category not selected";
             } else {
-                account = accountService.getAccountById(transaction.getAccountId().getAccountId());
+                account = accountService.getAccountById(transaction.getAccount().getAccountId());
                 Double totalBalance = account.getAccountBalance();
                 totalBalance += transaction.getTransactionAmount();
 
@@ -75,7 +74,7 @@ public class TransactionController {
             if (transaction.getTransactionCategory() == null) {
                 message = "Category not selected";
             } else {
-                account = accountService.getAccountById(transaction.getAccountId().getAccountId());
+                account = accountService.getAccountById(transaction.getAccount().getAccountId());
                 Double totalBalance = account.getAccountBalance();
                 totalBalance -= transaction.getTransactionAmount();
 
@@ -107,7 +106,7 @@ public class TransactionController {
         Double totalAmount;
         Double gmf;
         Double totalBalance;
-        int accountId = transaction.getAccountId().getAccountId();
+        int accountId = transaction.getAccount().getAccountId();
 
         try {
             transaction.setTransactionCategory("Tax");

@@ -1,14 +1,12 @@
 package com.wallet.service.impl;
 
-import com.wallet.entity.Account;
-import com.wallet.entity.Transaction;
+import com.wallet.domain.entity.Account;
 import com.wallet.repository.AccountRepository;
 import com.wallet.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -22,12 +20,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Account> getAccountsByUserId(int userId) throws Exception {
-        return accountRepository.findByUserId_UserId(userId);
+        return accountRepository.findByUser_UserId(userId);
     }
 
     @Override
     public Account getAccountDetails(int accountId, int userId) throws Exception {
-        return accountRepository.findByAccountIdAndUserId_UserId(accountId, userId);
+        return accountRepository.findByAccountIdAndUser_UserId(accountId, userId);
     }
 
     @Override

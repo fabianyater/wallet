@@ -1,10 +1,7 @@
-package com.wallet.entity;
+package com.wallet.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalTime;
@@ -17,29 +14,30 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "txn_id")
     private Integer transactionId;
 
-    @Column(nullable = false)
+    @Column(name = "amount", nullable = false)
     private Double transactionAmount;
 
-    @Column(nullable = true)
+    @Column(name = "description")
     private String transactionDescription;
 
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false)
     private String transactionType;
 
-    @Column(nullable = false)
+    @Column(name = "category", nullable = false)
     private String transactionCategory;
 
-    @Column(nullable = false)
+    @Column(name = "date", nullable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
     private Date transactionDate;
 
-    @Column(nullable = false)
+    @Column(name = "time", nullable = false)
     private LocalTime transactionTime;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "account_id_account_id")
-    private Account accountId;
+    @JoinColumn(name = "account_id")
+    private Account account;
 
 }

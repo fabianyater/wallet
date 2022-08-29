@@ -1,9 +1,12 @@
 package com.wallet.controller;
 
-import com.wallet.entity.Account;
+import com.wallet.domain.dto.AccountDto;
+import com.wallet.domain.dto.UpdateAccountDto;
+import com.wallet.domain.entity.Account;
 import com.wallet.model.GeneralResponse;
 import com.wallet.service.AccountService;
 import com.wallet.service.TransactionService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,10 @@ import static com.wallet.util.CommonMessages.ERROR_MESSAGE;
 @RestController
 @RequestMapping("accounts")
 public class AccountController {
+
+    @Autowired
+    ModelMapper modelMapper;
+
     @Autowired
     private AccountService accountService;
 
@@ -24,25 +31,28 @@ public class AccountController {
     private TransactionService transactionService;
 
     @PostMapping()
-    public ResponseEntity<GeneralResponse<Account>> save(@RequestBody Account account) {
-        GeneralResponse<Account> response = new GeneralResponse<>();
+    public ResponseEntity<GeneralResponse<AccountDto>> save(@RequestBody AccountDto accountDtoRequest) {
+        GeneralResponse<AccountDto> response = new GeneralResponse<>();
         HttpStatus status;
-        Account data = null;
+        Account account;
+        AccountDto accountDto = null;
         List<Account> accounts;
         String message;
 
         try {
             accounts = accountService.getAccounts();
 
-            if (!containsName(accounts, account.getAccountName())) {
-                data = accountService.saveAccount(account);
+            if (!containsName(accounts, accountDtoRequest.getAccountName())) {
+                account = modelMapper.map(accountDtoRequest, Account.class);
+                accountService.saveAccount(account);
+                accountDto = modelMapper.map(account, AccountDto.class);
                 message = "Account correctly created";
             } else {
                 message = "Account name is already in use";
             }
 
             response.setMessage(message);
-            response.setData(data);
+            response.setData(accountDto);
             response.setCode(201);
             status = HttpStatus.CREATED;
 
@@ -85,29 +95,40 @@ public class AccountController {
         return new ResponseEntity<>(response, status);
     }
 
-    @PutMapping("/{id}/edit")
-    public ResponseEntity<GeneralResponse<Account>> updateAccount(@RequestBody Account account, @PathVariable("id") Integer id) {
-        GeneralResponse<Account> response = new GeneralResponse<>();
+    @PutMapping("/{accountId}/edit")
+    public ResponseEntity<GeneralResponse<UpdateAccountDto>> updateAccount(@RequestBody UpdateAccountDto accountDtoRequest, @PathVariable("accountId") Integer accountId) {
+        GeneralResponse<UpdateAccountDto> response = new GeneralResponse<>();
         HttpStatus status;
-        Account data = null;
+        Account account;
+        Account newAccount;
+        List<Account> accounts;
+        UpdateAccountDto updateAccountDto = null;
         String message;
 
         try {
-            if (accountService.getAccountById(id) == null) {
+            if (accountService.getAccountById(accountId) == null || accountService.getAccountById(accountId).getAccountId() != accountId) {
                 message = "Account no found";
             } else {
-                data = accountService.getAccountById(id);
+                account = accountService.getAccountById(accountId);
+                accounts = accountService.getAccountsByUserId(accountId);
 
-                data.setAccountName(account.getAccountName());
-                data.setAccountCurrency(account.getAccountCurrency());
-                data.setAccountBalance(account.getAccountBalance());
+                if (!containsName(accounts, accountDtoRequest.getAccountName())) {
+                    account.setAccountName(accountDtoRequest.getAccountName());
+                    account.setAccountCurrency(accountDtoRequest.getAccountCurrency());
+                    account.setAccountBalance(accountDtoRequest.getAccountBalance());
 
-                accountService.saveAccount(data);
-                message = "Account successfully created";
+                    newAccount = accountService.saveAccount(account);
+
+                    updateAccountDto = modelMapper.map(newAccount, UpdateAccountDto.class);
+                    message = "Account correctly updated";
+                } else {
+                    message = "Account name is already in use";
+                }
+
             }
 
             response.setMessage(message);
-            response.setData(data);
+            response.setData(updateAccountDto);
             status = HttpStatus.CREATED;
 
         } catch (Exception e) {

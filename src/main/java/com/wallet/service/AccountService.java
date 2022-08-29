@@ -1,6 +1,6 @@
 package com.wallet.service;
 
-import com.wallet.entity.Account;
+import com.wallet.domain.entity.Account;
 
 import java.util.List;
 

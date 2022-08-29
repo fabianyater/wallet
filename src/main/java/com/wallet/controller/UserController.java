@@ -1,6 +1,6 @@
 package com.wallet.controller;
 
-import com.wallet.entity.User;
+import com.wallet.domain.entity.User;
 import com.wallet.model.GeneralResponse;
 import com.wallet.service.AccountService;
 import com.wallet.service.UserService;
