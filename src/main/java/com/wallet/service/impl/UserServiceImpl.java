@@ -1,6 +1,6 @@
 package com.wallet.service.impl;
 
-import com.wallet.entity.User;
+import com.wallet.domain.entity.User;
 import com.wallet.repository.UserRepository;
 import com.wallet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

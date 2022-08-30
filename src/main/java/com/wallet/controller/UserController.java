@@ -1,11 +1,15 @@
 package com.wallet.controller;
 
-import com.wallet.entity.Account;
-import com.wallet.entity.User;
+import com.wallet.domain.dto.AccountInfoDto;
+import com.wallet.domain.dto.UserDto;
+import com.wallet.domain.dto.UserInfoDto;
+import com.wallet.domain.entity.Account;
+import com.wallet.domain.entity.User;
 import com.wallet.model.GeneralResponse;
 import com.wallet.service.AccountService;
 import com.wallet.service.UserService;
 import com.wallet.util.JwtUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("user")
 public class UserController {
+
+    @Autowired
+    ModelMapper modelMapper;
     @Autowired
     private UserService userService;
 
@@ -41,10 +48,12 @@ public class UserController {
     private static final String ERROR_MESSAGE = "Something has failed. Please contact support";
 
     @PostMapping("/signup")
-    public ResponseEntity<GeneralResponse<User>> createUser(@RequestBody User user) {
-        GeneralResponse<User> response = new GeneralResponse<>();
+    public ResponseEntity<GeneralResponse<UserDto>> createUser(@RequestBody UserDto userRequest) {
+        GeneralResponse<UserDto> response = new GeneralResponse<>();
         HttpStatus status;
-        User data = null;
+        User user = modelMapper.map(userRequest, User.class);
+        User data;
+        UserDto userDto = null;
         String message;
         List<User> usersList;
 
@@ -54,13 +63,14 @@ public class UserController {
             if (!containsName(usersList, user.getUsername())) {
                 user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
                 data = userService.save(user);
+                userDto = modelMapper.map(data, UserDto.class);
                 message = "User successfully created";
             } else {
                 message = "Username is already in use";
             }
 
             response.setMessage(message);
-            response.setData(data);
+            response.setData(userDto);
             status = HttpStatus.CREATED;
 
         } catch (Exception e) {
@@ -73,18 +83,23 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<GeneralResponse<User>> login(@RequestBody User user) {
-        GeneralResponse<User> response = new GeneralResponse<>();
+    public ResponseEntity<GeneralResponse<UserDto>> login(@RequestBody UserDto userRequest) {
+        GeneralResponse<UserDto> response = new GeneralResponse<>();
         HttpStatus status;
+        User user;
+        UserDto userDto = null;
         String message;
         try {
+            user = modelMapper.map(userRequest, User.class);
             authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
             user.setJwt(jwtUtils.generateToken(user.getUsername()));
             user.setPassword(null);
-            message = "User: " + user.getUsername() + " successfully logged.";
+            userDto = modelMapper.map(user, UserDto.class);
+            message = "User: " + userDto.getUsername() + " successfully logged.";
+
             response.setMessage(message);
-            response.setData(user);
+            response.setData(userDto);
             status = HttpStatus.CREATED;
 
         } catch (AuthenticationException authException) {
@@ -102,10 +117,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GeneralResponse<User>> getUserById(@PathVariable("id") Integer id) {
-        GeneralResponse<User> response = new GeneralResponse<>();
+    public ResponseEntity<GeneralResponse<Optional<UserInfoDto>>> getUserById(@PathVariable("id") Integer id) {
+        GeneralResponse<Optional<UserInfoDto>> response = new GeneralResponse<>();
         HttpStatus status;
-        Optional<User> user = Optional.of(new User());
+        Optional<User> user;
+        Optional<UserInfoDto> userInfoDto = Optional.of(new UserInfoDto());
         String message;
 
         try {
@@ -113,11 +129,12 @@ public class UserController {
                 message = "User not found";
             } else {
                 user = userService.getById(id);
+                userInfoDto = user.map(this::convertToDto);
                 message = "User successfully found";
             }
 
             response.setMessage(message);
-            response.setData(user.get());
+            response.setData(userInfoDto);
             status = HttpStatus.OK;
 
         } catch (Exception e) {
@@ -131,5 +148,10 @@ public class UserController {
 
     private boolean containsName(final List<User> users, final String username) {
         return users.stream().anyMatch(o -> o.getUsername().equals(username));
+    }
+
+    private UserInfoDto convertToDto(User user) {
+        UserInfoDto userInfoDto = modelMapper.map(user, UserInfoDto.class);
+        return userInfoDto;
     }
 }

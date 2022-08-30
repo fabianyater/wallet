@@ -1,6 +1,6 @@
 package com.wallet.service;
 
-import com.wallet.entity.Account;
+import com.wallet.domain.entity.Account;
 
 import java.util.List;
 
@@ -18,5 +18,7 @@ public interface AccountService {
     Account getAccountById(int id) throws Exception;
 
     Double getAccountBalance(int id) throws Exception;
+
+    Account getAccountByTxnId(int id) throws Exception;
 
 }

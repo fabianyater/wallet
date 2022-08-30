@@ -1,6 +1,6 @@
 package com.wallet.service.impl;
 
-import com.wallet.entity.Transaction;
+import com.wallet.domain.entity.Transaction;
 import com.wallet.repository.TransactionRepository;
 import com.wallet.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<Transaction> getTransactionsByAccountId(int accountId) throws Exception {
-        return transactionRepository.findByAccountId_AccountId(accountId);
+        return transactionRepository.findByAccount_AccountId(accountId);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Optional<Transaction> getTransactionSDetails(Integer txnId, Integer accountId) throws Exception {
-        return transactionRepository.findByTransactionIdAndAccountId_AccountId(txnId, accountId);
+        return transactionRepository.findByTransactionIdAndAccount_AccountId(txnId, accountId);
     }
 
     @Override

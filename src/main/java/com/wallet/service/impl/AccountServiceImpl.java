@@ -1,14 +1,12 @@
 package com.wallet.service.impl;
 
-import com.wallet.entity.Account;
-import com.wallet.entity.Transaction;
+import com.wallet.domain.entity.Account;
 import com.wallet.repository.AccountRepository;
 import com.wallet.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -38,6 +36,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Double getAccountBalance(int id) throws Exception {
         return accountRepository.findAccountBalance(id);
+    }
+
+    @Override
+    public Account getAccountByTxnId(int id) throws Exception {
+        return accountRepository.findByTransactions_TransactionId(id);
     }
 
     @Override

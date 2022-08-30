@@ -1,6 +1,6 @@
 package com.wallet.service;
 
-import com.wallet.entity.Transaction;
+import com.wallet.domain.entity.Transaction;
 
 import java.util.List;
 import java.util.Optional;
