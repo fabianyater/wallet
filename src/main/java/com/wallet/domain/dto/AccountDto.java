@@ -1,6 +1,5 @@
 package com.wallet.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.wallet.domain.entity.User;
 import lombok.Data;
 

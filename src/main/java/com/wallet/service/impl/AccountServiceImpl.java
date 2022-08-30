@@ -39,6 +39,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Account getAccountByTxnId(int id) throws Exception {
+        return accountRepository.findByTransactions_TransactionId(id);
+    }
+
+    @Override
     public Account saveAccount(Account account) throws Exception {
         return accountRepository.save(account);
     }

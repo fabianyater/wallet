@@ -2,13 +2,16 @@ package com.wallet.domain.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property="userId")
-@Data
 @Entity
 @Table(name = "users")
 public class User {

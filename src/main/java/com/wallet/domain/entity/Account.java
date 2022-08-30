@@ -2,13 +2,16 @@ package com.wallet.domain.entity;
 
 import com.fasterxml.jackson.annotation.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property="accountId")
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "accounts")
 public class Account {
@@ -32,7 +35,6 @@ public class Account {
     @JsonIgnoreProperties("accounts")
     private User user;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "account", orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Transaction> transactions = new LinkedHashSet<>();
-
 }

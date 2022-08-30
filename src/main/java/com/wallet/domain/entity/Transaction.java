@@ -1,16 +1,19 @@
 package com.wallet.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.Data;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.sql.Date;
 import java.time.LocalTime;
-import java.util.Date;
 
+@Getter
+@Setter
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property="transactionId")
-@Data
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -33,13 +36,15 @@ public class Transaction {
     private String transactionCategory;
 
     @Column(name = "date", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date transactionDate;
+
+
 
     @Column(name = "time", nullable = false)
     private LocalTime transactionTime;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
 
